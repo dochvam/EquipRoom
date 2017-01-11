@@ -4,19 +4,11 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Scanner;
 import java.util.HashMap;
-import javafx.application.Application;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
-import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.TextField;
-import javafx.scene.layout.GridPane;
-import javafx.scene.text.Text;
-import javafx.stage.Stage;
-import javafx.event.EventHandler;
-import javafx.event.ActionEvent;
 
 
+/**
+ * Created by dochvam on 1/10/17.
+ */
 public class EquipRoom{
 
 	protected int noItems;
@@ -40,23 +32,18 @@ public class EquipRoom{
 		this.whoArray = people;
 	}
 
-
-
-	public static void main(String[] args){
-		Scanner scan = new Scanner(System.in);
+    public static void main(String[] args) {
+   		Scanner scan = new Scanner(System.in);
 		int noItems = scan.nextInt();
 
 		EquipRoom allInfo = new EquipRoom(noItems);
 
 		allInfo.readIn(scan);
 
-
-
-
-
 		allInfo.readOut();
+    }
 
-	}
+
 
 
 	public void readIn(Scanner scan) {
@@ -76,64 +63,103 @@ public class EquipRoom{
 	}
 
 
-	public void readOut(){
+	public String readOut(){
+		String outString = "";
 
-		System.out.println(this.noItems);
-		System.out.println("");
+		outString += this.noItems + "\n";
 
 		for (int i=0; i < noItems; i++){
-			System.out.print(equipArray[i] + " ");
+			outString += (equipArray[i] + " ");
 			if (timeArray[i][0] != null){
-				System.out.print(timeArray[i][0].getTime() + " ");
-				System.out.print(timeArray[i][1].getTime() + " ");
+				outString += (timeArray[i][0].getTime() + " ");
+				outString += (timeArray[i][1].getTime() + " ");
 			} else {
-				System.out.print(1 + " ");
-				System.out.print(1 + " ");
+				outString += (1 + " ");
+				outString += (1 + " ");
 			}
-			System.out.println(whoArray[i]);
+			outString += (whoArray[i]) + "\n";
 		}
+
+		return outString;
 	}
 
 
-	public void checkOutItem(String item, String person){
+	public String checkOutItem(String item, String person){
 		Date time = new Date();
 
 		int i = this.getItemIndex(item);
+		if (i < 0) return "Item "+item+" not in database";
+
+		if (timeArray[i][0] != null){
+			return "Item " + item + " already checked out";
+		}
+
 
 		this.timeArray[i][0] = time;
 		this.timeArray[i][1] = new Date(time.getTime() + 172800000);
 		this.whoArray[i] = person;
+		return "Successfully checked out " + item + " to " + person;
 	}
 
+	public String addItem(String item){
 
-	public void checkInItem(String item){
+		noItems++;
+
+		String[] newEquipArray = new String[noItems];
+		Date[][] newTimeArray = new Date[noItems][2];
+		String[] newWhoArray = new String[noItems];
+
+		for (int i = 0; i<noItems-1; i++){
+			newEquipArray[i] = equipArray[i];
+			newTimeArray[i][0] = timeArray[i][0];
+			newTimeArray[i][1] = timeArray[i][1];
+			newWhoArray[i] = whoArray[i];
+		}
+
+		newEquipArray[noItems-1] = item;
+		newTimeArray[noItems-1][0] = null;
+		newTimeArray[noItems-1][1] = null;
+		newWhoArray[noItems-1] = "N/A";
+
+		this.equipArray = newEquipArray;
+		this.timeArray = newTimeArray;
+		this.whoArray = newWhoArray;
+
+		return "Added item " + item + " to database";
+
+	}
+
+	public String checkInItem(String item){
 		Date time = new Date();
 
 		int i = this.getItemIndex(item);
+		if (i < 0) return "Item "+item+" not in database";
+
+		if (timeArray[i][0] == null){
+			return "Item " + item + " not checked out";
+		}
 
 		if (time.getTime() > timeArray[i][1].getTime()) System.out.println("Equipment is late.");
 
 		this.timeArray[i][0] = null;
 		this.timeArray[i][1] = null;
+		this.whoArray[i] = "N/A";
 
+		return "Successfully checked in " + item;
 	}
 
 	public void inventoryItem(String item){
 		int i = this.getItemIndex(item);
-
 		System.out.println("Item: "+item);
 		//Figure out the best way to display due dates
 		System.out.println("Checked out by: " + this.whoArray[i]);
-
 	}
 
 	public int getItemIndex(String item){
 		int index = -1;
 		for (int i = 0; i<noItems; i++){
-			if (item == this.equipArray[i]) index = i;
+			if (item.equals(this.equipArray[i])) index = i;
 		}
-		if (index == -1) System.out.println("Item " + item + " not in database.");
 		return index;
 	}
-
 }
