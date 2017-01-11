@@ -39,15 +39,18 @@ public class ERUI extends Application {
         
 
         TextField itemField = new TextField();
-        grid.add(itemField, 0, 1);
-
+        grid.add(itemField, 1, 1);
         TextField nameField = new TextField();
-        grid.add(nameField, 0, 0);
+        grid.add(nameField, 1, 0);
+        Text nameHead = new Text("Your name:\n(no spaces)");
+        grid.add(nameHead, 0, 0);
+        Text itemHead = new Text("Item:");
+        grid.add(itemHead, 0, 1);
 
         Text statusHead = new Text("Status:");
-        grid.add(statusHead, 0, 9);
+        grid.add(statusHead, 1, 9);
         Text status = new Text("Welcome to the ATV Equipment Room!");
-        grid.add(status, 0, 10);
+        grid.add(status, 1, 10);
         
         Button outButton = new Button("Check item in");
         grid.add(outButton, 2, 5);
