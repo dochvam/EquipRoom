@@ -10,13 +10,14 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.event.EventHandler;
 import javafx.event.ActionEvent;
-import java.io.PrintWriter;
-import java.io.File;
+import java.io.*;
+import java.util.Date;
 
 
 public class ERUI extends Application {
 
 	String password = "ATV123";
+    String currentAdmin = "";
 
     public static void main(String[] args) {
 		launch(args);
@@ -24,12 +25,8 @@ public class ERUI extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
-   		Scanner scan = new Scanner(System.in);
-		int noItems = scan.nextInt();
 
-		EquipRoom allInfo = new EquipRoom(noItems);
-
-		allInfo.readIn(scan);
+		EquipRoom allInfo = new EquipRoom();
 
 		GridPane grid = new GridPane();
         grid.setAlignment(Pos.TOP_LEFT);
@@ -55,15 +52,22 @@ public class ERUI extends Application {
         Button outButton = new Button("Check item in");
         grid.add(outButton, 2, 5);
         outButton.setOnAction(actionEvent -> {
-        	status.setText(allInfo.checkInItem(itemField.getText()));
+        	String update = allInfo.checkInItem(itemField.getText());
+            status.setText(update);
+            logAction(update);
         	itemField.setText("");
         });
 
         Button inButton = new Button("Check item out");
         grid.add(inButton, 3, 5);
         inButton.setOnAction(actionEvent -> {
-        	status.setText(allInfo.checkOutItem(itemField.getText(), nameField.getText()));
-        	itemField.setText("");
+            String user = allInfo.getUser(nameField.getText());
+            if (!user.equals("USER NOT RECOGNIZED")) {
+                String update = allInfo.checkOutItem(itemField.getText(), user);
+            	status.setText(update);
+                logAction(update);
+            	itemField.setText("");
+            } else status.setText(user);
         });
 
         Button printButton = new Button("Print to terminal");
@@ -80,12 +84,26 @@ public class ERUI extends Application {
 		    try
 		    {
 		        PrintWriter printWriter = new PrintWriter(file);
-		        printWriter.print (allInfo.readOut());
+		        printWriter.print(allInfo.readOut());
 		        printWriter.close();
 		    }
-		    catch (Exception ex){
+		    catch (Exception ignored){
 		    }
+
+            File file2 = new File ("users.txt");
+            try
+            {
+                PrintWriter printWriter = new PrintWriter(file2);
+                printWriter.print(allInfo.readOutUserDatabase());
+                printWriter.close();
+            }
+            catch (Exception ignored){
+            }
+
         });
+
+        Button addUser = new Button("Add user");
+        grid.add(addUser, 4, 6);
 
 
         //Admin-only buttons: add item, admin logout, review late fees
@@ -96,11 +114,16 @@ public class ERUI extends Application {
         Button adminLogIn = new Button ("Admin");
         grid.add(adminLogIn, 3, 6);
         adminLogIn.setOnAction(actionEvent -> {
-        	if (itemField.getText().equals(password)){
-        		status.setText("Admin code accepted");
-        		grid.add(addItemButton, 2, 7);
-        		grid.add(adminLogOut, 3, 7);
-        		grid.add(latesButton, 4, 7);
+        	if (itemField.getText().equals(password)) {
+                String user = allInfo.getUser(nameField.getText());
+                if (!user.equals("USER NOT RECOGNIZED")){
+                    currentAdmin = user;
+            		status.setText("Admin code accepted. Welcome, "+currentAdmin);
+            		grid.add(addItemButton, 2, 7);
+            		grid.add(adminLogOut, 3, 7);
+            		grid.add(latesButton, 4, 7);
+                }
+                else status.setText(user);
         	}
         	else {
         		status.setText("Admin code invalid");
@@ -119,16 +142,29 @@ public class ERUI extends Application {
        		String item = itemField.getText();
        		allInfo.addItem(item);
        		itemField.setText("");
+
        	});
 
         stage.setScene(new Scene(grid, 600, 400));
         stage.show();
 
     }
+
+    public static void logAction(String action) {
+        File file = new File("transactionhistory.txt");
+        Writer writer = null;
+        try {
+            writer = new BufferedWriter(new OutputStreamWriter(
+                new FileOutputStream(file, true), "UTF-8"));
+        } catch (Exception e){System.out.println("Didn't work");}
+
+        Date time = new Date();
+        String timestamp = time.toString();
+        try {
+            if (writer != null)
+                writer.write("\n" + action +"\t " + timestamp);
+            writer.close();
+        } catch (Exception e) {System.out.println("Didn't work");}
+    }
 }
-
-
-
-
-
 

@@ -1,0 +1,4 @@
+
+Successfully checked out Camera1 to BRG
+Item Camera1 not checked outWed Jan 11 10:06:28 PST 2017
+Successfully checked out Camera1 to BRGWed Jan 11 10:06:37 PST 2017

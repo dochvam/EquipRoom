@@ -1,9 +1,7 @@
-import java.util.Date;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Scanner;
-import java.util.HashMap;
+import java.util.*;
+import java.io.*;
 
 
 /**
@@ -16,13 +14,10 @@ public class EquipRoom{
 	protected Date[][] timeArray;
 	protected String[] whoArray;
 
-	protected HashMap<Long, String> userDatabase;
+	protected HashMap<String, String[]> userDatabase;
 
-	public EquipRoom(int noItems){
-		this.noItems = noItems;
-		this.equipArray = new String[noItems];
-		this.timeArray = new Date[noItems][2];
-		this.whoArray = new String[noItems];
+	public EquipRoom() {
+		readIn();
 	}
 
 	public EquipRoom(String[] equip, Date[][] time, String[] people){
@@ -33,37 +28,58 @@ public class EquipRoom{
 	}
 
     public static void main(String[] args) {
-   		Scanner scan = new Scanner(System.in);
-		int noItems = scan.nextInt();
-
-		EquipRoom allInfo = new EquipRoom(noItems);
-
-		allInfo.readIn(scan);
-
-		allInfo.readOut();
+    	EquipRoom er = new EquipRoom();
+    	System.out.println(er.userDatabase.toString());
     }
 
 
 
 
-	public void readIn(Scanner scan) {
+	public void readIn() {
 
-		for (int i = 0; i < noItems; i++){
-			this.equipArray[i] = scan.next();
-			
-			long x = scan.nextLong();
-			if (x != 1) this.timeArray[i][0] = new Date(x);
+		File file = new File("EquipRoom.txt");
 
-			x = scan.nextLong();
-			if (x != 1) this.timeArray[i][1] = new Date(x);
+		int noItems = 0;
+		String[] equipArray = null;
+		Date[][] timeArray = null;
+		String[] whoArray = null;
+
+		try {
+			Scanner scan = new Scanner(file);
 			
-			this.whoArray[i] = scan.next();
-		}
-		
+			noItems = scan.nextInt();
+			equipArray = new String[noItems];
+			timeArray = new Date[noItems][2];
+			whoArray = new String[noItems];
+
+
+			for (int i = 0; i < noItems; i++){
+				equipArray[i] = scan.next();
+				
+				long x = scan.nextLong();
+				if (x != 1) timeArray[i][0] = new Date(x);
+
+				x = scan.nextLong();
+				if (x != 1) timeArray[i][1] = new Date(x);
+				
+				whoArray[i] = scan.next();
+			}
+
+		} catch (Exception ignored) {
+			System.out.println("Read-in not working");
+		}		
+
+		this.noItems = noItems;
+		this.equipArray = equipArray;
+		this.timeArray = timeArray;
+		this.whoArray = whoArray;
+
+		readInUserDatabase();
+
 	}
 
 
-	public String readOut(){
+	public String readOut() {
 		String outString = "";
 
 		outString += this.noItems + "\n";
@@ -78,6 +94,21 @@ public class EquipRoom{
 				outString += (1 + " ");
 			}
 			outString += (whoArray[i]) + "\n";
+		}
+
+		return outString;
+	}
+
+	public String readOutUserDatabase() {
+		String outString = "";
+
+		Iterator iter = userDatabase.entrySet().iterator();
+
+		while (iter.hasNext()) {
+			Map.Entry pair = (Map.Entry)iter.next();
+			outString += pair.getKey();
+			String[] name = (String[]) pair.getValue();
+			outString += "\t " + name[0] + " " + name[1];
 		}
 
 		return outString;
@@ -129,13 +160,35 @@ public class EquipRoom{
 
 	}
 
-	public String checkInItem(String item){
+	public void readInUserDatabase() {
+		File file = new File("users.txt");
+		HashMap<String, String[]> userDatabase = new HashMap<>();
+
+		try {
+			Scanner scanner = new Scanner(file);
+
+			while (scanner.hasNext()){
+				String id = (String) scanner.next();
+				String firstname = scanner.next();
+				String lastname = scanner.next();
+				String[] name = new String[2];
+				name[0] = firstname; name[1] = lastname;
+				userDatabase.put(id, name);
+			}
+
+		} catch (Exception ignored) {
+			System.out.println("No one taught me exceptions");
+		}
+		this.userDatabase = userDatabase;
+	}
+
+	public String checkInItem(String item) {
 		Date time = new Date();
 
 		int i = this.getItemIndex(item);
 		if (i < 0) return "Item "+item+" not in database";
 
-		if (timeArray[i][0] == null){
+		if (timeArray[i][0] == null) {
 			return "Item " + item + " not checked out";
 		}
 
@@ -148,18 +201,29 @@ public class EquipRoom{
 		return "Successfully checked in " + item;
 	}
 
-	public void inventoryItem(String item){
+	public void inventoryItem(String item) {
 		int i = this.getItemIndex(item);
 		System.out.println("Item: "+item);
 		//Figure out the best way to display due dates
 		System.out.println("Checked out by: " + this.whoArray[i]);
 	}
 
-	public int getItemIndex(String item){
+	public int getItemIndex(String item) {
 		int index = -1;
 		for (int i = 0; i<noItems; i++){
 			if (item.equals(this.equipArray[i])) index = i;
 		}
 		return index;
 	}
+
+	public String getUser(String id) {
+		try {
+			String[] name = (String[]) userDatabase.get(id);
+			return name[0] + " " + name[1];
+		} catch (Exception ignored) {
+			return "USER NOT RECOGNIZED";
+		}
+	}
 }
+
+
