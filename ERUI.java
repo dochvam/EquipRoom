@@ -15,9 +15,9 @@ import java.util.Date;
 
 
 public class ERUI extends Application {
-
-	String password = "ATV123";
+    String password = "ATV123";
     String currentAdmin = "";
+    String currentUser = "";
 
     public static void main(String[] args) {
 		launch(args);
@@ -26,6 +26,7 @@ public class ERUI extends Application {
     @Override
     public void start(Stage stage) throws Exception {
 
+
 		EquipRoom allInfo = new EquipRoom();
 
 		GridPane grid = new GridPane();
@@ -33,24 +34,22 @@ public class ERUI extends Application {
         grid.setHgap(10);
         grid.setVgap(10);
         grid.setPadding(new Insets(25, 25, 25, 25));
-        
 
-        TextField itemField = new TextField();
-        grid.add(itemField, 1, 1);
+        Button login = new Button("Scan and login");
+        grid.add(login, 1, 1);
         TextField nameField = new TextField();
         grid.add(nameField, 1, 0);
-        Text nameHead = new Text("Your name:\n(no spaces)");
-        grid.add(nameHead, 0, 0);
+
+
+        TextField itemField = new TextField();
+
+        Text nameHead = new Text("Your ID");
         Text itemHead = new Text("Item:");
-        grid.add(itemHead, 0, 1);
 
         Text statusHead = new Text("Status:");
-        grid.add(statusHead, 1, 9);
         Text status = new Text("Welcome to the ATV Equipment Room!");
-        grid.add(status, 1, 10);
         
         Button outButton = new Button("Check item in");
-        grid.add(outButton, 2, 5);
         outButton.setOnAction(actionEvent -> {
         	String update = allInfo.checkInItem(itemField.getText());
             status.setText(update);
@@ -59,26 +58,20 @@ public class ERUI extends Application {
         });
 
         Button inButton = new Button("Check item out");
-        grid.add(inButton, 3, 5);
         inButton.setOnAction(actionEvent -> {
-            String user = allInfo.getUser(nameField.getText());
-            if (!user.equals("USER NOT RECOGNIZED")) {
-                String update = allInfo.checkOutItem(itemField.getText(), user);
-            	status.setText(update);
-                logAction(update);
-            	itemField.setText("");
-            } else status.setText(user);
+            String update = allInfo.checkOutItem(itemField.getText(), currentUser);
+            status.setText(update);
+            logAction(update);
+            itemField.setText("");
         });
 
         Button printButton = new Button("Print to terminal");
-        grid.add(printButton, 4, 5);
         printButton.setOnAction(actionEvent -> {
         	System.out.println(allInfo.readOut());
         	System.out.println("No. items = " + allInfo.noItems);
         });
 
         Button backupButton = new Button("Save record");
-        grid.add(backupButton, 2, 6);
         backupButton.setOnAction(actionEvent -> {
         	File file = new File ("EquipRoom.txt");
 		    try
@@ -103,7 +96,6 @@ public class ERUI extends Application {
         });
 
         Button addUser = new Button("Add user");
-        grid.add(addUser, 4, 6);
 
 
         //Admin-only buttons: add item, admin logout, review late fees
@@ -112,20 +104,14 @@ public class ERUI extends Application {
         Button adminLogOut = new Button("Admin log out");
 
         Button adminLogIn = new Button ("Admin");
-        grid.add(adminLogIn, 3, 6);
         adminLogIn.setOnAction(actionEvent -> {
         	if (itemField.getText().equals(password)) {
-                String user = allInfo.getUser(nameField.getText());
-                if (!user.equals("USER NOT RECOGNIZED")){
-                    currentAdmin = user;
-            		status.setText("Admin code accepted. Welcome, "+currentAdmin);
-            		grid.add(addItemButton, 2, 7);
-            		grid.add(adminLogOut, 3, 7);
-            		grid.add(latesButton, 4, 7);
-                }
-                else status.setText(user);
-        	}
-        	else {
+                currentAdmin = currentUser;
+        		status.setText("Admin code accepted. Welcome, "+currentAdmin);
+        		grid.add(addItemButton, 2, 7);
+        		grid.add(adminLogOut, 3, 7);
+        		grid.add(latesButton, 4, 7);
+            } else {
         		status.setText("Admin code invalid");
         	}
         	itemField.setText("");
@@ -144,9 +130,31 @@ public class ERUI extends Application {
        		itemField.setText("");
 
        	});
+        login.setOnAction(actionEvent -> {
+            String name = allInfo.getUser(nameField.getText());
+            if (!name.equals("USER NOT RECOGNIZED")){
+                grid.getChildren().remove(login);
+                grid.add(itemField, 1, 1);
+                grid.add(nameHead, 0, 0);
+                grid.add(itemHead, 0, 1);
+                grid.add(statusHead, 1, 9);
+                grid.add(outButton, 2, 5);
+                grid.add(inButton, 3, 5);
+                grid.add(printButton, 4, 5);
+                grid.add(backupButton, 2, 6);
+                grid.add(addUser, 4, 6);
+                grid.add(adminLogIn, 3, 6);
+                status.setText("Welcome "+name);
+                currentUser = name;
+            }
+            else status.setText("User not recognized");
+        });
+
+        grid.add(status, 1, 10);
 
         stage.setScene(new Scene(grid, 600, 400));
         stage.show();
+
 
     }
 
