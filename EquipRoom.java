@@ -108,7 +108,7 @@ public class EquipRoom{
 			Map.Entry pair = (Map.Entry)iter.next();
 			outString += pair.getKey();
 			String[] name = (String[]) pair.getValue();
-			outString += "\t " + name[0] + " " + name[1];
+			outString += "\t " + name[0] + " " + name[1] + "\n";
 		}
 
 		return outString;
@@ -219,7 +219,7 @@ public class EquipRoom{
 	public String getUser(String id) {
 		try {
 			String[] name = (String[]) userDatabase.get(id);
-			return name[0] + " " + name[1];
+			return name[0] + "_" + name[1];
 		} catch (Exception ignored) {
 			return "USER NOT RECOGNIZED";
 		}

@@ -96,12 +96,19 @@ public class ERUI extends Application {
         });
 
         Button addUser = new Button("Add user");
-
+        addUser.setOnAction(actionEvent -> {
+            String id = nameField.getText();
+            String squished = itemField.getText();
+            String[] name = squished.split("\\s+");
+            allInfo.userDatabase.put(id, name);
+        });
 
         //Admin-only buttons: add item, admin logout, review late fees
        	Button latesButton = new Button("Late returns");
        	Button addItemButton = new Button("Add item");
         Button adminLogOut = new Button("Admin log out");
+        Button logout = new Button("Log out");
+
 
         Button adminLogIn = new Button ("Admin");
         adminLogIn.setOnAction(actionEvent -> {
@@ -111,6 +118,9 @@ public class ERUI extends Application {
         		grid.add(addItemButton, 2, 7);
         		grid.add(adminLogOut, 3, 7);
         		grid.add(latesButton, 4, 7);
+                grid.add(addUser, 4, 6);
+                grid.getChildren().remove(logout);
+
             } else {
         		status.setText("Admin code invalid");
         	}
@@ -119,17 +129,20 @@ public class ERUI extends Application {
 
        	adminLogOut.setOnAction(actionEvent -> {
        		status.setText("Admin logged out");
+            currentAdmin = "";
        		grid.getChildren().remove(addItemButton);
        		grid.getChildren().remove(adminLogOut);
         	grid.getChildren().remove(latesButton);
+            grid.getChildren().remove(addUser);
+            grid.add(logout, 4, 6);
        	});
 
        	addItemButton.setOnAction(actionEvent -> {
        		String item = itemField.getText();
        		allInfo.addItem(item);
        		itemField.setText("");
-
        	});
+
         login.setOnAction(actionEvent -> {
             String name = allInfo.getUser(nameField.getText());
             if (!name.equals("USER NOT RECOGNIZED")){
@@ -142,12 +155,28 @@ public class ERUI extends Application {
                 grid.add(inButton, 3, 5);
                 grid.add(printButton, 4, 5);
                 grid.add(backupButton, 2, 6);
-                grid.add(addUser, 4, 6);
                 grid.add(adminLogIn, 3, 6);
+                grid.add(logout, 4, 6);
                 status.setText("Welcome "+name);
                 currentUser = name;
             }
             else status.setText("User not recognized");
+        });
+
+        logout.setOnAction(actionEvent -> {
+            currentUser = "";
+            grid.add(login, 1, 1);
+            grid.getChildren().remove(itemField);
+            grid.getChildren().remove(nameHead);
+            grid.getChildren().remove(statusHead);
+            grid.getChildren().remove(outButton);
+            grid.getChildren().remove(inButton);
+            grid.getChildren().remove(printButton);
+            grid.getChildren().remove(backupButton);
+            grid.getChildren().remove(adminLogIn);
+            grid.getChildren().remove(logout);
+            grid.getChildren().remove(itemHead);
+            status.setText("Goodbye");
         });
 
         grid.add(status, 1, 10);
