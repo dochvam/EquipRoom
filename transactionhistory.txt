@@ -3,3 +3,5 @@ Successfully checked out Camera1 to BRG
 Item Camera1 not checked outWed Jan 11 10:06:28 PST 2017
 Successfully checked out Camera1 to BRGWed Jan 11 10:06:37 PST 2017
 Successfully checked out Camera1 to Ben Goldstein	 Sun Jan 15 11:17:05 EST 2017
+Item Camera1 already checked out	 Tue Jan 17 21:54:14 EST 2017
+Successfully checked in Camera1	 Tue Jan 17 21:54:19 EST 2017
